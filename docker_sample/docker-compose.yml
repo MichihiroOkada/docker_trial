@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  server:
+    image: oka_server
+    container_name: oka_server-container
+    ports:
+      - 50001:8080
+
+  client:
+    image: oka_client
+    container_name: oka_client-container
+    depends_on:
+      - server
+    ports:
+      - 50002:8080
