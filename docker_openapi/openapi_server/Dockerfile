@@ -1,24 +1,36 @@
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:22.04 AS build
 
-CMD echo "hello oka server"
-
-#install
 RUN apt-get update && apt-get install -y \
-    software-properties-common
+        cmake \
+        openssl \
+        gcc \
+        g++ \
+        libqhttpengine-dev \
+        net-tools
 
-RUN apt-get install -y golang
-RUN apt-get install -y golang-go
-RUN add-apt-repository ppa:longsleep/golang-backports
+RUN apt-get install -y git
+RUN apt-get install -y qtbase5-dev
+RUN apt-get install -y libssl-dev
+RUN apt-get install -y libcrypt-dev
 
-COPY ./server /
-#CMD tail -f /dev/null
-RUN go build -a -o openapi_server .
+COPY ./server /server
+WORKDIR /server
+#ADD ./src ./src
+#ADD ./CMakeLists.txt ./
+RUN mkdir -p ./build
+WORKDIR /server/build
+RUN cmake  -DNODEBUG:STRING="ON" ..
+RUN make
 
-FROM ubuntu:22.04 AS runtime
-COPY --from=builder /openapi_server ./
-#ENTRYPOINT ["go run ./main.go"]
-#ENTRYPOINT ["ls"]
-ENTRYPOINT ["./openapi_server"]
-#ENTRYPOINT ["tail -f /dev/null"]
-
-
+#FROM alpine:latest AS runtime
+#RUN apk add --update \
+#        libgcc  \
+#        libstdc++  \
+#        qt5-qtbase \
+#        openssl
+#
+#WORKDIR /usr/server
+#COPY --from=build /usr/server/build/src/cpp-qt-qhttpengine-server ./build/src/
+#COPY --from=build /usr/server/external/ ./external
+EXPOSE 8080/tcp
+ENTRYPOINT /server/build/src/cpp-qt-qhttpengine-server

@@ -4,7 +4,7 @@ services:
     image: oka_server
     container_name: oka_server-container
     ports:
-      - 50001:8080
+      - 60001:8080
 
   client:
     image: oka_client
@@ -12,4 +12,4 @@ services:
     depends_on:
       - server
     ports:
-      - 50002:8080
+      - 60002:8080

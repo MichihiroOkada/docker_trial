@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   server:
-    image: openapi_server_qt
+    image: openapi_server
     container_name: openapi_server-container
     ports:
       - 50001:8080

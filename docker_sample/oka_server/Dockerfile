@@ -13,10 +13,12 @@ RUN add-apt-repository ppa:longsleep/golang-backports
 
 CMD ls -l /
 COPY ./oka.sh /oka.sh
+ADD ./oka_add.sh /oka_add.sh
 #CMD tail -f /dev/null
 
 FROM ubuntu:20.04 AS runtime
 COPY --from=builder /oka.sh ./
+COPY --from=builder /oka_add.sh ./oka_add.sh
 ENTRYPOINT ["./oka.sh"]
 
 

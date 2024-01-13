@@ -1,15 +1,29 @@
-FROM golang:1.19 AS build
-WORKDIR /go/src
-COPY go ./go
-COPY main.go .
-COPY go.sum .
-COPY go.mod .
+FROM alpine:latest AS build
 
-ENV CGO_ENABLED=0
+RUN apk add --update \
+        cmake \
+        alpine-sdk \
+        openssl \
+        qt5-qtbase-dev \
+        qt5-qttools-dev
 
-RUN go build -o openapi .
+WORKDIR /usr/server
+ADD ./src ./src
+ADD ./CMakeLists.txt ./
+RUN mkdir -p ./build
+WORKDIR /usr/server/build
+RUN cmake  -DNODEBUG:STRING="ON" ..
+RUN make
 
-FROM scratch AS runtime
-COPY --from=build /go/src/openapi ./
+FROM alpine:latest AS runtime
+RUN apk add --update \
+        libgcc  \
+        libstdc++  \
+        qt5-qtbase \
+        openssl
+
+WORKDIR /usr/server
+COPY --from=build /usr/server/build/src/cpp-qt-qhttpengine-server ./build/src/
+COPY --from=build /usr/server/external/ ./external
 EXPOSE 8080/tcp
-ENTRYPOINT ["./openapi"]
+ENTRYPOINT ["/usr/server/build/src/cpp-qt-qhttpengine-server"]
